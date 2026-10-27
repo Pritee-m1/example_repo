@@ -1,0 +1,55 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Load the dataset
+df = pd.read_csv("student-mat.csv", sep=";")
+
+# 1. Inspect the dataset
+print("First five rows:")
+print(df.head())
+
+print("\nDataset shape:")
+print(df.shape)
+
+print("\nDataset information:")
+df.info()
+
+# 2. Check missing values
+print("\nMissing values:")
+print(df.isnull().sum())
+
+# 3. Check duplicate records
+print("\nDuplicate records:", df.duplicated().sum())
+
+# 4. Remove duplicate records
+df = df.drop_duplicates()
+
+# 5. Check numerical summary
+print("\nStatistical summary:")
+print(df.describe())
+
+# 6. Check outliers using the IQR method
+numeric_cols = df.select_dtypes(include="number").columns
+
+for col in numeric_cols:
+    Q1 = df[col].quantile(0.25)
+    Q3 = df[col].quantile(0.75)
+    IQR = Q3 - Q1
+    lower = Q1 - 1.5 * IQR
+    upper = Q3 + 1.5 * IQR
+    count = ((df[col] < lower) | (df[col] > upper)).sum()
+    print(f"{col}: {count} potential outliers")
+
+# 7. Create a cleaned dataset
+df.to_csv("student-mat-cleaned.csv", index=False)
+
+print("\nCleaned dataset saved successfully!")
+print("Final dataset shape:", df.shape)
+
+# 8. Visualize final grades
+df["G3"].hist(bins=10)
+plt.title("Distribution of Final Grades")
+plt.xlabel("Final Grade")
+plt.ylabel("Number of Students")
+plt.savefig("final_grades_histogram.png")
+plt.show()
